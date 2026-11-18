@@ -1,0 +1,22 @@
+name: Build Chary APK from zip
+on: [push, workflow_dispatch]
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip project
+        run: unzip -q chary.zip
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - name: Set up and build
+        working-directory: chary
+        run: |
+          bash setup.sh
+          flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chary-apk
+          path: chary/build/app/outputs/flutter-apk/app-release.apk
