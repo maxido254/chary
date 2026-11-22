@@ -1,5 +1,7 @@
 name: Build Chary APK from zip
 on: [push, workflow_dispatch]
+permissions:
+  contents: write
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -20,3 +22,10 @@ jobs:
         with:
           name: chary-apk
           path: chary/build/app/outputs/flutter-apk/app-release.apk
+      - name: Publish the APK as a release
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp chary/build/app/outputs/flutter-apk/app-release.apk Chary.apk
+          gh release create "v${{ github.run_number }}" Chary.apk --title "Chary (Android) v${{ github.run_number }}" --notes "Download Chary.apk on your phone, open it and allow installing from this source. Uninstall any older copy first."
